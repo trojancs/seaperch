@@ -8,11 +8,17 @@
 #define in3 5
 #define in4 4
 
+// Motor C connections aka up down
+#define enC 10   // dont forget to fill out these values
+#define in5 11
+#define in6 12
+
+//the up down motor only spins one direction, pushing it down
+int downmaxspeed = 255 //max speed motors can go up
+int downstartspeed = 10 //speed that the motors start at, miniumm speed
+
 int speedonlimit = 517; //when the motors turn forward
 int speedofflimit = 490; // when the motor start turning backward
-
-int rightonlimit = 522; //when motors start turning right
-int leftonlimit = 502; //when motors start turning left
 
 int maxforwardspeed = 255; //max forward speed
 int maxbackspeed = 64; //max backward speed
@@ -23,48 +29,53 @@ int backwardmotorstart = 33;
 int MaxTurningInPlaceSpeed = 180;  //max speed that it can turn in place
 int turningstart = 20;
 
-
-
 void setup() {
   Serial.begin(9600); //start serial comunication with computer
   pinMode(A0, INPUT); //right/left analog input
-  pinMode(A1, INPUT); //up/down analog input
+  pinMode(A1, INPUT); //forward/backward analog input
+  pinMode(A2, INPUT); //up/down analog input
  
-  pinMode(enB, OUTPUT); //pwm pin for motor b
   pinMode(enA, OUTPUT); //pwm pin for motor a
+  pinMode(enB, OUTPUT); //pwm pin for motor b
+  pinMode(enC, OUTPUT); //pwm pin for motor c
   
   pinMode(in1, OUTPUT); //direction control pins
   pinMode(in2, OUTPUT);
   pinMode(in3, OUTPUT);
   pinMode(in4, OUTPUT);
+  pinMode(in5, OUTPUT);
+  pinMode(in6, OUTPUT);
 }
-
-
 
 void loop() {
   int turn = analogRead(A0);
   int speed = analogRead(A1);
+  int upspeed = analogRead(A2):
 
+  digitalWrite(in5, HIGH); //direction of up down motor, reverse if backward
+  digitalWrite(in6, LOW);
+  analogWrite(enC, map(upspeed, 0, 1024, downstartspeed, downmaxspeed));
+  
   if(speed > speedofflimit && speed < speedonlimit) { //turning in place 
-    if(turn > rightonlimit) { //turn right
+    if(turn > 522) { //turn right
       digitalWrite(in1, HIGH);
       digitalWrite(in2, LOW);
       digitalWrite(in3, LOW);
       digitalWrite(in4, HIGH);
       
-      int rightspeed = map(turn, rightonlimit, 1024, turningstart, MaxTurningInPlaceSpeed);
+      int rightspeed = map(turn, 522, 1024, turningstart, MaxTurningInPlaceSpeed);
       
       analogWrite(enB, rightspeed);  
       analogWrite(enA, rightspeed);        
       } 
            
-    else if(turn < leftonlimit) { //turn left
+    else if(turn < 502) { //turn left
       digitalWrite(in1, LOW);
       digitalWrite(in2, HIGH);
       digitalWrite(in3, HIGH);
       digitalWrite(in4, LOW);
       
-      int leftspeed = map(turn, leftonlimit, 0, turningstart, MaxTurningInPlaceSpeed);
+      int leftspeed = map(turn, 502, 0, turningstart, MaxTurningInPlaceSpeed);
       
       analogWrite(enB, leftspeed); // right motor
       analogWrite(enA, leftspeed);  //left motor 
@@ -87,14 +98,14 @@ void loop() {
           
       int forwardspeed = map(speed, speedonlimit, 1024, forwardmotorstart, maxforwardspeed);
       
-      if(turn > rightonlimit) { //turn right
-        int forwardright = map(turn, rightonlimit, 1024, 0, forwardspeed);
+      if(turn > 522) { //turn right
+        int forwardright = map(turn, 522, 1024, 0, forwardspeed);
         analogWrite(enB, forwardspeed - forwardright);
         analogWrite(enA, forwardspeed);       
         }
         
-      else if(turn < leftonlimit) { //turn left
-        int forwardleft = map(turn, leftonlimit, 0, 0, forwardspeed);
+      else if(turn < 502) { //turn left
+        int forwardleft = map(turn, 502, 0, 0, forwardspeed);
         analogWrite(enB, forwardspeed); //right motor
         analogWrite(enA, forwardspeed - forwardleft);  // left motor       
         } 
@@ -115,14 +126,14 @@ void loop() {
       
       int backwardspeed = map(speed, speedofflimit, 0, backwardmotorstart, maxbackspeed); 
 
-      if(turn > rightonlimit) { //turn right
-        int backwardright = map(turn, rightonlimit, 1024, 0, backwardspeed);
+      if(turn > 522) { //turn right
+        int backwardright = map(turn, 522, 1024, 0, backwardspeed);
         analogWrite(enB, backwardspeed - backwardright); //right motor
         analogWrite(enA, backwardspeed);  //left motor        
         }
 
-      else if(turn < leftonlimit) { //turn left
-        int backwardleft = map(turn, leftonlimit, 0, 0, backwardspeed);
+      else if(turn < 502) { //turn left
+        int backwardleft = map(turn, 502, 0, 0, backwardspeed);
         analogWrite(enB, backwardspeed); //right motor
         analogWrite(enA, backwardspeed - backwardleft);  // left motor       
         }
@@ -134,11 +145,13 @@ void loop() {
     }  
 
 
-   else{ //turns motors off
+   else{ //turns all motors off
       digitalWrite(in1, LOW);
       digitalWrite(in2, LOW);
       digitalWrite(in3, LOW);
-      digitalWrite(in4, LOW);     
+      digitalWrite(in4, LOW);
+      digitalWrite(in5, LOW);
+      digitalWrite(in6, LOW);       
       }
 }
 
